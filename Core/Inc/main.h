@@ -31,7 +31,9 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "term_io.h"
+#include "ansi.h"
+#include "dbgu.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
