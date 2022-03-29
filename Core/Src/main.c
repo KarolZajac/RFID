@@ -23,6 +23,7 @@
 #include "usart.h"
 #include "usb_otg.h"
 #include "gpio.h"
+#include "../RFID/Inc/rc522_com.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -51,28 +52,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-/* USER CODE BEGIN PFP */
-uint8_t rc522_registerToByteRead(uint8_t reg)
-{
-	return ((reg << 1) & 0x7E) | 0x80;
-}
-
-uint8_t rc522_registerToByteWrite(uint8_t reg)
-{
-	return ((reg << 1) & 0x7E);
-}
-
-uint8_t rc522_readReg(uint8_t reg)
-{
-	const uint8_t toWrite = rc522_registerToByteRead(reg);
-	HAL_GPIO_WritePin(SPI3_CS_GPIO_Port, SPI3_CS_Pin, GPIO_PIN_RESET);
-	HAL_SPI_Transmit(&hspi3, &toWrite, 1, 100);
-	uint8_t returned = 0;
-	HAL_SPI_Receive(&hspi3, &returned, 1, 100);
-	HAL_GPIO_WritePin(SPI3_CS_GPIO_Port, SPI3_CS_Pin, GPIO_PIN_SET);
-	return returned;
-}
-/* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
@@ -120,8 +99,11 @@ int main(void)
 	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		const uint8_t versionRegisterAddr = 0x37;
-		xprintf("Read from reg 0x%x value 0x%x\n", versionRegisterAddr,
+		const uint8_t versionRegisterAddr = 0x32;
+		xprintf("Read from reg 0x%x value 0x%x before writing\r\n ", versionRegisterAddr,
+				rc522_readReg(versionRegisterAddr));
+		rc522_writeReg(versionRegisterAddr, 0xDE);
+		xprintf("Read from reg 0x%x value 0x%x after writing\r\n ", versionRegisterAddr,
 				rc522_readReg(versionRegisterAddr));
 		HAL_Delay(1000);
 		/* USER CODE END WHILE */
