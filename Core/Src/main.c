@@ -93,6 +93,8 @@ int main(void)
 	/* USER CODE BEGIN 2 */
 	debug_init(&huart3);
 	xprintf("Program started, verification number %d\n", 3);
+	HAL_Delay(2000);
+	rc522_init();
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
