@@ -62,8 +62,7 @@ void SystemClock_Config(void);
  * @brief  The application entry point.
  * @retval int
  */
-int main(void)
-{
+int main(void) {
 	/* USER CODE BEGIN 1 */
 
 	/* USER CODE END 1 */
@@ -99,14 +98,21 @@ int main(void)
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	while (1)
-	{
+
+	uint8_t rfid_id[4];
+	while (1) {
 		const uint8_t versionRegisterAddr = 0x32;
-		xprintf("Read from reg 0x%x value 0x%x before writing\r\n ", versionRegisterAddr,
-				rc522_readReg(versionRegisterAddr));
-		rc522_writeReg(versionRegisterAddr, 0xDE);
-		xprintf("Read from reg 0x%x value 0x%x after writing\r\n ", versionRegisterAddr,
-				rc522_readReg(versionRegisterAddr));
+//		xprintf("Read from reg 0x%x value 0x%x before writing\r\n ",
+//				versionRegisterAddr, rc522_readReg(versionRegisterAddr));
+//		rc522_writeReg(versionRegisterAddr, 0xDE);
+//		xprintf("Read from reg 0x%x value 0x%x after writing\r\n ",
+//				versionRegisterAddr, rc522_readReg(versionRegisterAddr));
+		if (rc522_checkCard(rfid_id)) {
+
+			xprintf("RFID code is: \r\n 0x%x 0x%x 0x%x 0x%x", rfid_id[0], rfid_id[1],
+					rfid_id[2], rfid_id[3]);
+
+		}
 		HAL_Delay(1000);
 		/* USER CODE END WHILE */
 
@@ -119,12 +125,9 @@ int main(void)
  * @brief System Clock Configuration
  * @retval None
  */
-void SystemClock_Config(void)
-{
-	RCC_OscInitTypeDef RCC_OscInitStruct =
-	{ 0 };
-	RCC_ClkInitTypeDef RCC_ClkInitStruct =
-	{ 0 };
+void SystemClock_Config(void) {
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
 	/** Configure the main internal regulator output voltage
 	 */
@@ -142,8 +145,7 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLN = 168;
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 	RCC_OscInitStruct.PLL.PLLQ = 7;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-	{
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
 		Error_Handler();
 	}
 
@@ -156,8 +158,7 @@ void SystemClock_Config(void)
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-	{
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK) {
 		Error_Handler();
 	}
 }
@@ -170,13 +171,11 @@ void SystemClock_Config(void)
  * @brief  This function is executed in case of error occurrence.
  * @retval None
  */
-void Error_Handler(void)
-{
+void Error_Handler(void) {
 	/* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
-	while (1)
-	{
+	while (1) {
 	}
 	/* USER CODE END Error_Handler_Debug */
 }
