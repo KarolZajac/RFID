@@ -138,19 +138,19 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 		break;
 	}
 
-	rc522_writeReg(0x02, irqEn | 0x80);
-	rc522_clearRegBitMask(0x04, 0x80);
-	rc522_setRegBitMask(0x0A, 0x80);
+	rc522_writeReg(0x02, irqEn | 0x80);//interrupt request control register,  enable interrupts based on command type. Also invert signal on IRQ pin.
+	rc522_clearRegBitMask(0x04, 0x80);//interrupt request register, clear all pending interrupts
+	rc522_setRegBitMask(0x0A, 0x80);//FIFO level register, clear FIFO
 
-	rc522_writeReg(0x01, 0x00);
+	rc522_writeReg(0x01, 0x00);//command register, idle command -  cancel whatever the chip is doing
 
 	//Writing data to the FIFO
 	for (i = 0; i < sendLen; i++) {
-		rc522_writeReg(0x09, sendData[i]);
+		rc522_writeReg(0x09, sendData[i]);//FIFO data register, fill FIFO with data
 	}
 
 	//Execute the command
-	rc522_writeReg(0x01, command);
+	rc522_writeReg(0x01, command);//register command again, transfer up to 25 bytes from FIFO to internal buffer
 	if (command == PCD_TRANSCEIVE) {
 		rc522_setRegBitMask(0x0D, 0x80); //StartSend=1,transmission of data starts
 	}
@@ -160,44 +160,44 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 	do {
 		//CommIrqReg[7..0]
 		//Set1 TxIRq RxIRq IdleIRq HiAlerIRq LoAlertIRq ErrIRq TimerIRq
-		n = rc522_readReg(0x04);
+		n = rc522_readReg(0x04);//read interrupt request bits
 		i--;
-	} while ((i != 0) && !(n & 0x01) && !(n & waitIRq));
+	} while ((i != 0) && !(n & 0x01) && !(n & waitIRq));//until timeout or expected interrupts are generated
 
-	rc522_clearRegBitMask(0x0D, 0x80);     //StartSend=0
+	rc522_clearRegBitMask(0x0D, 0x80);//Bit framing register, startSend=0 - is that even legal? stop transmission?
 
-	if (i != 0) {
-		if (!(rc522_readReg(0x06) & 0x1B)) {
+	if (i != 0) {//if not timeouted
+		if (!(rc522_readReg(0x06) & 0x1B)) { //if no error in error register on buffer overflow, collision error, parity error or protocol error
 			status = 1;
-			if (n & irqEn & 0x01) {
-				status = 0;
+			if (n & irqEn & 0x01) {//if command==transcieve and timeout interrupt active
+				status = 0;//fail
 			}
 
 			if (command == PCD_TRANSCEIVE) {
-				n = rc522_readReg(0x0A);
+				n = rc522_readReg(0x0A);//get number of bytes in FIFO
 				uint8_t l = n;
-				lastBits = rc522_readReg(0x0C) & 0x07;
-				if (lastBits) {
-					*backLen = (n - 1) * 8 + lastBits;
+				lastBits = rc522_readReg(0x0C) & 0x07;//3 lowest bits in controlReg - RxLastBits, number of valid b
+				if (lastBits) {//Not whole byte valid
+					*backLen = (n - 1) * 8 + lastBits; // save number of valid bits
 				} else {
-					*backLen = n * 8;
+					*backLen = n * 8;//save number of valid bits
 				}
 
-				if (n == 0) {
-					n = 1;
+				if (n == 0) {//if no bytes in fifo
+					n = 1;//why?
 				}
-				if (n > RC522_MAX_LEN) {
+				if (n > RC522_MAX_LEN) {//If too many bytes in fifo
 					n = RC522_MAX_LEN;
 				}
 
 				//Reading the received data in FIFO
 				for (i = 0; i < n; i++) {
-					uint8_t d = rc522_readReg(0x09);
+					uint8_t d = rc522_readReg(0x09);//fifo data register
 					if (l == 4)
-						printf("%02x ", d);
+						printf("%02x ", d);//If receiving exactly 4 bytes, print them
 					backData[i] = d;
 				}
-				if (l == 4)
+				if (l == 4)//If received exactly 4 bytes, newline
 					printf("\r\n");
 				return status;
 			}
@@ -219,7 +219,7 @@ uint8_t rc522_antiColl(uint8_t *serNum) {
 	//for (i = 0; i < 4; i++)
 //    printf("Anticoll In %d: 0x%02x\r\n", i, serNum[i]);
 
-	rc522_writeReg(0x0D , 0x00); //TxLastBists = BitFramingReg[2..0]
+	rc522_writeReg(0x0D , 0x00); //TxLastBists = BitFramingReg[2..0] - all bits set as valid
 
 	serNum[0] = PICC_ANTICOLL;
 	serNum[1] = 0x20;
