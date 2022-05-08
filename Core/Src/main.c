@@ -24,7 +24,7 @@
 #include "usb_otg.h"
 #include "gpio.h"
 #include "../RFID/Inc/rc522_com.h"
-
+#include "../RFID/Inc/card_com.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -99,9 +99,9 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	uint8_t rfid_id[4];
+	uint8_t rfid_id[40];
 	while (1) {
-		const uint8_t versionRegisterAddr = 0x32;
+//		const uint8_t versionRegisterAddr = 0x32;
 //		xprintf("Read from reg 0x%x value 0x%x before writing\r\n ",
 //				versionRegisterAddr, rc522_readReg(versionRegisterAddr));
 //		rc522_writeReg(versionRegisterAddr, 0xDE);
@@ -109,8 +109,9 @@ int main(void) {
 //				versionRegisterAddr, rc522_readReg(versionRegisterAddr));
 		if (rc522_checkCard(rfid_id)) {
 
-			xprintf("RFID code is: \r\n 0x%x 0x%x 0x%x 0x%x", rfid_id[0], rfid_id[1],
+			xprintf("RFID code is: \r\n 0x%02x 0x%02x 0x%02x 0x%02x\n", rfid_id[0], rfid_id[1],
 					rfid_id[2], rfid_id[3]);
+			card_select(rfid_id);
 
 		}
 		HAL_Delay(1000);

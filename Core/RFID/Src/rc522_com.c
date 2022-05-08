@@ -9,15 +9,6 @@
 
 #define RC522_MAX_LEN         16
 
-/* Commands */
-#define PCD_IDLE            0x00
-#define PCD_AUTHENT           0x0E
-#define PCD_TRANSCEIVE          0x0C
-
-/* Mifare_One card command word */
-#define PICC_REQIDL           0x26
-#define PICC_ANTICOLL         0x93
-
 
 uint8_t rc522_registerToByteRead(uint8_t reg) {
 	return ((reg << 1) & 0x7E) | 0x80;
@@ -101,9 +92,9 @@ uint8_t rc522_request(uint8_t reqMode, uint8_t *tagType) {
 
 	uint8_t status = 0;
 	uint16_t backBits;
-	rc522_writeReg(0x0D, 0x07);
+	rc522_writeReg(0x0D, 0x07);//bit framing register,
 	tagType[0] = reqMode;
-	xprintf("status %d ", status);
+	//xprintf("status %d ", status);
 
 	status = rc522_toCard(PCD_TRANSCEIVE, tagType, 1, tagType, &backBits);
 	if ((status != 1) || (backBits != 0x10)) {
@@ -156,7 +147,7 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 	}
 
 	//Waiting to receive data to complete
-	i = 100; //i according to the clock frequency adjustment, the operator M1 card maximum waiting time 25ms???
+	i = 255; //i according to the clock frequency adjustment, the operator M1 card maximum waiting time 25ms???
 	do {
 		//CommIrqReg[7..0]
 		//Set1 TxIRq RxIRq IdleIRq HiAlerIRq LoAlertIRq ErrIRq TimerIRq
@@ -165,8 +156,9 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 	} while ((i != 0) && !(n & 0x01) && !(n & waitIRq));//until timeout or expected interrupts are generated
 
 	rc522_clearRegBitMask(0x0D, 0x80);//Bit framing register, startSend=0 - is that even legal? stop transmission?
-
+	xprintf("toCard timeout counter: %d\n",i);
 	if (i != 0) {//if not timeouted
+//		xprintf("ErrorReg: %d\n", rc522_readReg(0x06));
 		if (!(rc522_readReg(0x06) & 0x1B)) { //if no error in error register on buffer overflow, collision error, parity error or protocol error
 			status = 1;
 			if (n & irqEn & 0x01) {//if command==transcieve and timeout interrupt active
@@ -193,12 +185,9 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 				//Reading the received data in FIFO
 				for (i = 0; i < n; i++) {
 					uint8_t d = rc522_readReg(0x09);//fifo data register
-					if (l == 4)
-						printf("%02x ", d);//If receiving exactly 4 bytes, print them
 					backData[i] = d;
 				}
-				if (l == 4)//If received exactly 4 bytes, newline
-					printf("\r\n");
+
 				return status;
 			}
 		} else {
@@ -206,7 +195,7 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 			status = 0;
 		}
 	}
-	xprintf("status %d ", status);
+	xprintf("status %d\n", status);
 	return status;
 }
 
@@ -224,6 +213,7 @@ uint8_t rc522_antiColl(uint8_t *serNum) {
 	serNum[0] = PICC_ANTICOLL;
 	serNum[1] = 0x20;
 	status = rc522_toCard(PCD_TRANSCEIVE, serNum, 2, serNum, &unLen);
+	printf("returned data length: %d\n", unLen/8);
 
 	//for (i = 0; i < 4; i++)
 //      printf("Anticoll ToCard %d: 0x%02x\r\n", i, serNum[i]);
@@ -254,3 +244,31 @@ uint8_t rc522_checkCard(uint8_t *id) {
 
 	return status;
 }
+
+void rc522_calculateCRC(uint8_t*  pIndata, uint8_t len, uint8_t* pOutData)
+{
+  uint8_t i, n;
+
+  rc522_clearRegBitMask(0x05, 0x04);     //CRCIrq = 0
+  rc522_setRegBitMask(0x0A, 0x80);      //Clear the FIFO pointer
+  //Write_MFRC522(CommandReg, PCD_IDLE);
+
+  //Writing data to the FIFO
+  for (i = 0; i < len; i++) {
+    rc522_writeReg(0x09, *(pIndata+i));
+  }
+  rc522_writeReg(0x01, PCD_CALCCRC);
+
+  //Wait CRC calculation is complete
+  i = 0xFF;
+  do {
+    n = rc522_readReg(0x05);
+    i--;
+  } while ((i!=0) && !(n&0x04));      //CRCIrq = 1
+  //  xprintf("CRC timeout counter: %d\n",i);
+
+  //Read CRC calculation result
+  pOutData[0] = rc522_readReg(0x22);
+  pOutData[1] = rc522_readReg(0x21);
+}
+
