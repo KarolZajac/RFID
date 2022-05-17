@@ -10,8 +10,10 @@
 
 #include "inttypes.h"
 
-uint8_t card_authenticate(uint8_t *cardID, uint8_t *key);
+
+uint8_t card_authenticate(uint8_t *cardID, uint8_t *key,uint8_t blockId);
 
 uint8_t card_select(uint8_t *cardID);
+
 
 #endif /* RFID_INC_CARD_COM_H_ */

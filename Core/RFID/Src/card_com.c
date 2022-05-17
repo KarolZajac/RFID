@@ -9,8 +9,21 @@
 #include "../Inc/rc522_com.h"
 #include "../Inc/card_com.h"
 
-uint8_t card_authenticate(uint8_t *cardID, uint8_t *key){
+uint8_t card_authenticate(uint8_t *cardID, uint8_t *key, uint8_t blockId){
 
+
+		// Build command buffer
+		uint8_t sendData[12];
+		sendData[0] = PICC_AUTHNT_KEY_A;
+		sendData[1] = blockId;
+		for (uint8_t i = 0; i < 6; i++) {	// 6 key bytes
+			sendData[2+i] = key[i];
+		}
+
+		for (uint8_t i = 0; i < 4; i++) {				// The last 4 bytes of the UID
+			sendData[8+i] = cardID[i];
+		}
+		return rc522_toCard(PCD_AUTHENT, sendData, 12, 0, 0);
 }
 
 uint8_t card_select(uint8_t *cardID){
