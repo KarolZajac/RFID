@@ -8,9 +8,10 @@
 #define PCD_CALCCRC			0x03
 
 /* Mifare_One card command word */
-#define PICC_REQIDL           0x26
-#define PICC_ANTICOLL         0x93
+#define PICC_REQIDL           	0x26
+#define PICC_ANTICOLL        	0x93
 #define PICC_AUTHNT_KEY_A		0x60
+#define PICC_READ 				0x30
 
 
 void rc522_init(void);

@@ -9,6 +9,19 @@
 #include "../Inc/rc522_com.h"
 #include "../Inc/card_com.h"
 
+uint8_t card_read(uint8_t blockId, uint8_t *buffer, uint8_t *bufferSize)
+{
+	buffer[0]=PICC_READ;
+	buffer[1] = blockId;
+	rc522_calculateCRC(bufferSize, 2, &buffer[2]);
+	return rc522_toCard(PCD_TRANSCEIVE, buffer, 4, buffer, bufferSize);
+}
+
+void card_stopCrypto()
+{
+	rc522_clearRegBitMask(0x08, 0x08);
+}
+
 uint8_t card_authenticate(uint8_t *cardID, uint8_t *key, uint8_t blockId){
 
 

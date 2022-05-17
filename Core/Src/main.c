@@ -102,6 +102,8 @@ int main(void)
 
 	uint8_t rfid_id[8];
 	uint8_t cardKeyA[6];
+	uint8_t buffer[32];
+	uint8_t bufferSize = 32;
 	for (uint8_t i = 0; i < 6; ++i)
 	{
 		cardKeyA[i] = 0x0FF;
@@ -121,8 +123,17 @@ int main(void)
 					rfid_id[0], rfid_id[1], rfid_id[2], rfid_id[3]);
 			card_select(rfid_id);
 
-			uint8_t status = card_authenticate(rfid_id, cardKeyA, 3);
+			uint8_t status = card_authenticate(rfid_id, cardKeyA, 2);
 			xprintf("Auth status: %d\n", status);
+			status = card_read(2, buffer, &bufferSize);
+			card_stopCrypto();
+			xprintf("Read status: %d\n", status);
+			xprintf("Read %d bytes\n", bufferSize);
+			xprintf("Read data:\n");
+			for (uint8_t i = 0; i < 4; ++i)
+				xprintf("%d %d %d %d %d %d %d %d\n", buffer[i], buffer[i + 1],
+						buffer[i + 2], buffer[i + 3], buffer[i + 4],
+						buffer[i + 5], buffer[i + 6], buffer[i + 7]);
 		}
 		HAL_Delay(1000);
 		/* USER CODE END WHILE */
