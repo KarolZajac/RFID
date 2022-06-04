@@ -129,11 +129,11 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 		break;
 	}
 
-	rc522_writeReg(0x02, irqEn | 0x80);//interrupt request control register,  enable interrupts based on command type. Also invert signal on IRQ pin.
-	rc522_clearRegBitMask(0x04, 0x80);//interrupt request register, clear all pending interrupts
-	rc522_setRegBitMask(0x0A, 0x80);//FIFO level register, clear FIFO
+	rc522_writeReg(0x02, irqEn | 0x80); // interrupt req
+	rc522_clearRegBitMask(0x04, 0x80); // clear interrupt req bits
+	rc522_setRegBitMask(0x0A, 0x80);//FIFO init
 
-	rc522_writeReg(0x01, 0x00);//command register, idle command -  cancel whatever the chip is doing
+	rc522_writeReg(0x01, 0x00);
 
 	//Writing data to the FIFO
 	for (i = 0; i < sendLen; i++) {
@@ -143,20 +143,18 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 	//Execute the command
 	rc522_writeReg(0x01, command);//register command again, transfer up to 25 bytes from FIFO to internal buffer
 	if (command == PCD_TRANSCEIVE) {
-		rc522_setRegBitMask(0x0D, 0x80); //StartSend=1,transmission of data starts
+		rc522_setRegBitMask(0x0D, 0x80); //start data transmission startSend=1
 	}
 
 	//Waiting to receive data to complete
-	i = 255; //i according to the clock frequency adjustment, the operator M1 card maximum waiting time 25ms???
+	i = 2000; //max waiting time 20ms for now - writing data now works
 	do {
-		//CommIrqReg[7..0]
-		//Set1 TxIRq RxIRq IdleIRq HiAlerIRq LoAlertIRq ErrIRq TimerIRq
 		n = rc522_readReg(0x04);//read interrupt request bits
 		i--;
 	} while ((i != 0) && !(n & 0x01) && !(n & waitIRq));//until timeout or expected interrupts are generated
 
 	rc522_clearRegBitMask(0x0D, 0x80);//Bit framing register, startSend=0 - is that even legal? stop transmission?
-	xprintf("toCard timeout counter: %d\n",i);
+	//xprintf("toCard timeout counter: %d\n",i);
 	if (i != 0) {//if not timeouted
 //		xprintf("ErrorReg: %d\n", rc522_readReg(0x06));
 		if (!(rc522_readReg(0x06) & 0x1B)) { //if no error in error register on buffer overflow, collision error, parity error or protocol error
@@ -192,7 +190,7 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 			status = 0;
 		}
 	}
-	xprintf("status %d\n", status);
+	//xprintf("status %d\n", status);
 	return status;
 }
 
@@ -205,12 +203,12 @@ uint8_t rc522_antiColl(uint8_t *serNum) {
 	//for (i = 0; i < 4; i++)
 //    printf("Anticoll In %d: 0x%02x\r\n", i, serNum[i]);
 
-	rc522_writeReg(0x0D , 0x00); //TxLastBists = BitFramingReg[2..0] - all bits set as valid
+	rc522_writeReg(0x0D , 0x00);
 
 	serNum[0] = PICC_ANTICOLL;
 	serNum[1] = 0x20;
 	status = rc522_toCard(PCD_TRANSCEIVE, serNum, 2, serNum, &unLen);
-	printf("returned data length: %d\n", unLen/8);
+	//printf("returned data length: %d\n", unLen/8);
 
 	//for (i = 0; i < 4; i++)
 //      printf("Anticoll ToCard %d: 0x%02x\r\n", i, serNum[i]);
@@ -224,7 +222,7 @@ uint8_t rc522_antiColl(uint8_t *serNum) {
 			status = 0;
 		}
 	}
-	xprintf("status %d ", status);
+	xprintf("Anticollision status %d\n ", status);
 
 	return status;
 }
@@ -235,7 +233,7 @@ uint8_t rc522_checkCard(uint8_t *id) {
 	status = rc522_request(PICC_REQIDL, id);  //request card status
 	if (status == 1) { //if card detected
 		//Anti-collision, return card serial number 4 bytes
-		xprintf("Card detected");
+		xprintf("\nCard detected\n");
 		status = rc522_antiColl(id);
 	}
 
@@ -248,7 +246,6 @@ void rc522_calculateCRC(uint8_t*  pIndata, uint8_t len, uint8_t* pOutData)
 
   rc522_clearRegBitMask(0x05, 0x04);     //CRCIrq = 0
   rc522_setRegBitMask(0x0A, 0x80);      //Clear the FIFO pointer
-  //Write_MFRC522(CommandReg, PCD_IDLE);
 
   //Writing data to the FIFO
   for (i = 0; i < len; i++) {

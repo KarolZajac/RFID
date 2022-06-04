@@ -12,6 +12,8 @@
 #define PICC_ANTICOLL        	0x93
 #define PICC_AUTHNT_KEY_A		0x60
 #define PICC_READ 				0x30
+#define PICC_WRITE 				0xA0
+
 
 
 void rc522_init(void);

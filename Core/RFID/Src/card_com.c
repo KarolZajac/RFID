@@ -107,5 +107,37 @@ uint8_t card_select(uint8_t *cardID){
 	return size;
 }
 
+uint8_t card_write(uint8_t blockId, uint8_t *data)
+{
+	uint8_t buffer[18];
+	buffer[0]=PICC_WRITE;
+	buffer[1] = blockId;
+
+	rc522_calculateCRC(buffer, 2, &buffer[2]);
+
+	unsigned int returnBits;
+	uint8_t status = rc522_toCard(PCD_TRANSCEIVE, buffer, 4, buffer, &returnBits);
+
+	//xprintf("Status writing: %d", status);
+	if (status != 1){
+	    status = 0;
+	}
+	else{
+		for(uint8_t i=0; i<16; i++){
+			buffer[i]=*(data+1);
+		}
+
+		rc522_calculateCRC(buffer, 16, &buffer[16]);
+		status = rc522_toCard(PCD_TRANSCEIVE, buffer, 18, buffer, &returnBits);
+
+		if(status != 1){
+			xprintf("Error while writing data to card\n");
+			return 0;
+		}
+	}
+
+	return status;
+}
+
 
 
