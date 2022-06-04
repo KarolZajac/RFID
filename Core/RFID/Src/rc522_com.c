@@ -91,7 +91,7 @@ void antennaOff() {
 uint8_t rc522_request(uint8_t reqMode, uint8_t *tagType) {
 
 	uint8_t status = 0;
-	uint16_t backBits;
+	unsigned int backBits;
 	rc522_writeReg(0x0D, 0x07);//bit framing register,
 	tagType[0] = reqMode;
 	//xprintf("status %d ", status);
@@ -105,14 +105,14 @@ uint8_t rc522_request(uint8_t reqMode, uint8_t *tagType) {
 }
 
 uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
-		uint8_t *backData, uint16_t *backLen) {
+		uint8_t *backData, unsigned int *backLen) {
 
 	uint8_t status = 0;
 	uint8_t irqEn = 0x00;
 	uint8_t waitIRq = 0x00;
 	uint8_t lastBits;
 	uint8_t n;
-	uint16_t i;
+	unsigned int i;
 
 	switch (command) {
 	case PCD_AUTHENT: {
@@ -167,7 +167,6 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 
 			if (command == PCD_TRANSCEIVE) {
 				n = rc522_readReg(0x0A);//get number of bytes in FIFO
-				uint8_t l = n;
 				lastBits = rc522_readReg(0x0C) & 0x07;//3 lowest bits in controlReg - RxLastBits, number of valid b
 				if (lastBits) {//Not whole byte valid
 					*backLen = (n - 1) * 8 + lastBits; // save number of valid bits
@@ -187,8 +186,6 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 					uint8_t d = rc522_readReg(0x09);//fifo data register
 					backData[i] = d;
 				}
-
-				return status;
 			}
 		} else {
 			printf("error\r\n");
@@ -204,7 +201,7 @@ uint8_t rc522_antiColl(uint8_t *serNum) {
 	uint8_t status;
 	uint8_t i;
 	uint8_t serNumCheck = 0;
-	uint16_t unLen;
+	unsigned int unLen;
 	//for (i = 0; i < 4; i++)
 //    printf("Anticoll In %d: 0x%02x\r\n", i, serNum[i]);
 
