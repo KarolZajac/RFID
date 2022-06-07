@@ -92,6 +92,11 @@ void Error_Handler(void);
 #define STLK_RX_GPIO_Port GPIOD
 #define STLK_TX_Pin GPIO_PIN_9
 #define STLK_TX_GPIO_Port GPIOD
+#define TOUCH_IRQ_Pin GPIO_PIN_14
+#define TOUCH_IRQ_GPIO_Port GPIOD
+#define TOUCH_IRQ_EXTI_IRQn EXTI15_10_IRQn
+#define TOUCH_CS_Pin GPIO_PIN_15
+#define TOUCH_CS_GPIO_Port GPIOD
 #define USB_PowerSwitchOn_Pin GPIO_PIN_6
 #define USB_PowerSwitchOn_GPIO_Port GPIOG
 #define USB_OverCurrent_Pin GPIO_PIN_7
