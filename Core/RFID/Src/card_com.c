@@ -139,25 +139,14 @@ uint8_t card_write(uint8_t blockId, uint8_t *data)
 	return status;
 }
 
-int16_t map_logical_to_physical_addres(uint16_t logicalAddress){
-	uint16_t physicalAddress = 1;
-
+uint16_t map_logical_to_physical_addres(uint16_t logicalAddress)
+{
 	if(logicalAddress > 46){
-		xprintf("Logical address exceeds max block number.");
-		return -1;
+		printf("Logical address exceeds max block number.");
+		return 0xFFFF;
 	}
 
-	if(logicalAddress == 0){
-		return 1;
-	}
-
-	return logicalAddress+1
-
-	if(logicalAddress % 4 == 3){
-		return logicalAddress+1;
-	}
-
-	return physicalAddress;
+	return logicalAddress+1+(logicalAddress+1)/3;
 }
 
 

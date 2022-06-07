@@ -3,7 +3,6 @@
 #include "eth.h"
 #include "spi.h"
 #include "usart.h"
-#include "usb_otg.h"
 #include "gpio.h"
 #include "../Inc/rc522_com.h"
 
