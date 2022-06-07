@@ -12,6 +12,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
 protected:
+    Image dynamicImage;
 };
 
 #endif // SCREENVIEW_HPP
