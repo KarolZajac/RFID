@@ -33,6 +33,7 @@
 #include "../RFID/Inc/rc522_com.h"
 #include "../RFID/Inc/card_com.h"
 #include "display.h"
+#include "touch.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,7 +112,7 @@ int main(void)
 	display_init();
 	HAL_TIM_PWM_Start(&htim13, TIM_CHANNEL_1);
 	display_paint_red();
-	//calibrate_display();
+	calibrate_display();
 	xprintf("Calibration done!\n");
   /* USER CODE END 2 */
 
