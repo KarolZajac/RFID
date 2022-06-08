@@ -9,5 +9,9 @@
 #define RFID_INC_RFID_TASK_H_
 
 void startRfidTask(const void* _);
+void dummyLoop();
+void cardTaskLoop();
+void readFromPendriveToBuffer();
+
 
 #endif /* RFID_INC_RFID_TASK_H_ */

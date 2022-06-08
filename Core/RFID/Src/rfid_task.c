@@ -8,14 +8,19 @@
 #include "../Inc/rfid_task.h"
 #include "main.h"
 #include "FreeRTOS.h"
+#include "queue.h"
 #include "task.h"
+#include "usb_host.h"
 #include "../RFID/Inc/rc522_com.h"
 #include "../RFID/Inc/card_com.h"
+#include "../RFID/Core/Inc/Message.h"
 
 #define BUFFER_SIZE 752
 #define TEXT_BUFFER_SIZE 189
 #define USER_DATA_BLOCK_NUM 47
 
+extern QueueHandle_t toDisplayQueue;
+extern ApplicationTypeDef Appli_state;
 static uint8_t buffer[BUFFER_SIZE];
 static uint8_t textBuffer[TEXT_BUFFER_SIZE];
 
@@ -75,6 +80,29 @@ void dummyLoop() {
 	}
 }
 
+void readFromPendriveToBuffer(){
+	if (Appli_state == APPLICATION_READY)
+	    {
+	        FIL f;
+	        if (f_open(&f, "0:/img.bin", FA_READ) != FR_OK)
+	        {
+	            xprintf("Failed to open file!\n");
+	            return;
+	        }
+	        int sumDumped = 0;
+
+	        char tmpBuffer[16];
+	        unsigned numread = 0;
+	        while (f_read(&f, tmpBuffer, 16, &numread) == FR_OK && numread != 0 && sumDumped <= BUFFER_SIZE)
+	        {
+	            memcpy(&buffer[sumDumped], tmpBuffer, numread);
+	            sumDumped += numread;//xprintf("Read chunk: %s\n", buffer);
+	        }
+	        xprintf("Read %d bytes from file.\n", sumDumped);
+	        f_close(&f);
+	    }
+}
+
 void cardTaskLoop() {
 	uint8_t rfid_id[16];
 	uint8_t cardKeyA[6];
@@ -99,11 +127,15 @@ void cardTaskLoop() {
 
 				if (status == 1) {
 					if (doWrite == 1) {
+						readFromPendriveToBuffer();
 						xprintf("Writing data to card\n");
 						for (uint8_t i = 0; i < USER_DATA_BLOCK_NUM; i++) {
 							status = card_write(map_logical_to_physical_addres(i),&buffer[16 * i]);
 							xprintf("\nWrite status to block %d: %d\n", i,status);
 						}
+						snprintf(textBuffer, TEXT_BUFFER_SIZE, "Written to card");
+						toDisplayData_t displayData = {.imgData = NULL, .textDat = textBuffer};
+						xQueueSend(toDisplayQueue, displayData, 50);
 					} else {
 						for (uint8_t i = 0; i < USER_DATA_BLOCK_NUM; i++) {
 							status = card_read(map_logical_to_physical_addres(i),&buffer[16 * i]);
@@ -118,7 +150,9 @@ void cardTaskLoop() {
 									buffer[i + 4], buffer[i + 5], buffer[i + 6],
 									buffer[i + 7]);
 						}
-
+						snprintf(textBuffer, TEXT_BUFFER_SIZE, "Reading from card");
+						toDisplayData_t displayData = {.imgData = buffer, .textDat = textBuffer};
+						xQueueSend(toDisplayQueue, displayData, 50);
 					}
 					card_stopCrypto();
 				}
