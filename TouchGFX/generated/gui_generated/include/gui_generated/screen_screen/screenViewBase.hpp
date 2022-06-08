@@ -9,7 +9,10 @@
 #include <gui/screen_screen/screenPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
 #include <touchgfx/widgets/TiledImage.hpp>
-#include <touchgfx/widgets/ButtonWithLabel.hpp>
+#include <touchgfx/widgets/RadioButton.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
+#include <touchgfx/widgets/TextArea.hpp>
+#include <touchgfx/widgets/RadioButtonGroup.hpp>
 
 class screenViewBase : public touchgfx::View<screenPresenter>
 {
@@ -21,7 +24,12 @@ public:
     /*
      * Virtual Action Handlers
      */
-    virtual void buttonPressedCallback()
+    virtual void writeRadioCallback()
+    {
+        // Override and implement this function in screen
+    }
+
+    virtual void readRadioCallback()
     {
         // Override and implement this function in screen
     }
@@ -36,19 +44,23 @@ protected:
      */
     touchgfx::Box __background;
     touchgfx::TiledImage tiledImage1;
-    touchgfx::ButtonWithLabel blueButton;
+    touchgfx::RadioButton radioButtonWrite;
+    touchgfx::RadioButton radioButtonRead;
+    touchgfx::TextAreaWithOneWildcard textArea1;
+    touchgfx::TextArea buttonLabelText;
+    touchgfx::RadioButtonGroup<2> radioButtonGroup1;
 
 private:
 
     /*
      * Callback Declarations
      */
-    touchgfx::Callback<screenViewBase, const touchgfx::AbstractButton&> buttonCallback;
+    touchgfx::Callback<screenViewBase, const touchgfx::AbstractButton&> radioButtonSelectedCallback;
 
     /*
      * Callback Handler Declarations
      */
-    void buttonCallbackHandler(const touchgfx::AbstractButton& src);
+    void radioButtonSelectedCallbackHandler(const touchgfx::AbstractButton& src);
 
 };
 

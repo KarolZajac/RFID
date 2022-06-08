@@ -12,7 +12,8 @@ enum LANGUAGES
 
 enum TEXTS
 {
-    T___SINGLEUSE_L6S3,
+    T___SINGLEUSE_HL70,
+    T___SINGLEUSE_PPFX,
     NUMBER_OF_TEXT_KEYS
 };
 

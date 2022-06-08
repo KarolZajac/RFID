@@ -7,7 +7,7 @@
 #include <texts/TextKeysAndLanguages.hpp>
 
 screenViewBase::screenViewBase() :
-    buttonCallback(this, &screenViewBase::buttonCallbackHandler)
+    radioButtonSelectedCallback(this, &screenViewBase::radioButtonSelectedCallbackHandler)
 {
 
     __background.setPosition(0, 0, 320, 480);
@@ -17,16 +17,35 @@ screenViewBase::screenViewBase() :
     tiledImage1.setPosition(0, 0, 320, 480);
     tiledImage1.setOffset(0, 0);
 
-    blueButton.setXY(75, 98);
-    blueButton.setBitmaps(touchgfx::Bitmap(BITMAP_BLUE_BUTTONS_ROUND_EDGE_SMALL_ID), touchgfx::Bitmap(BITMAP_BLUE_BUTTONS_ROUND_EDGE_SMALL_PRESSED_ID));
-    blueButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_L6S3));
-    blueButton.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    blueButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    blueButton.setAction(buttonCallback);
+    radioButtonWrite.setXY(57, 63);
+    radioButtonWrite.setBitmaps(touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_INACTIVE_ID), touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_PRESSED_ID), touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_ACTIVE_ID), touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_NORMAL_ID));
+    radioButtonWrite.setSelected(true);
+    radioButtonWrite.setDeselectionEnabled(false);
+
+    radioButtonRead.setXY(218, 63);
+    radioButtonRead.setBitmaps(touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_INACTIVE_ID), touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_PRESSED_ID), touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_ACTIVE_ID), touchgfx::Bitmap(BITMAP_BLUE_RADIO_BUTTONS_RADIO_ROUND_BUTTON_NORMAL_ID));
+    radioButtonRead.setSelected(false);
+    radioButtonRead.setDeselectionEnabled(false);
+
+    textArea1.setPosition(48, 369, 225, 82);
+    textArea1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    textArea1.setLinespacing(0);
+    textArea1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_PPFX));
+
+    buttonLabelText.setPosition(0, 27, 320, 24);
+    buttonLabelText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    buttonLabelText.setLinespacing(0);
+    buttonLabelText.setTypedText(touchgfx::TypedText(T___SINGLEUSE_HL70));
 
     add(__background);
     add(tiledImage1);
-    add(blueButton);
+    add(radioButtonWrite);
+    add(radioButtonRead);
+    add(textArea1);
+    add(buttonLabelText);
+    radioButtonGroup1.add(radioButtonWrite);
+    radioButtonGroup1.add(radioButtonRead);
+    radioButtonGroup1.setRadioButtonSelectedHandler(radioButtonSelectedCallback);
 }
 
 void screenViewBase::setupScreen()
@@ -34,13 +53,20 @@ void screenViewBase::setupScreen()
 
 }
 
-void screenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
+void screenViewBase::radioButtonSelectedCallbackHandler(const touchgfx::AbstractButton& src)
 {
-    if (&src == &blueButton)
+    if (&src == &radioButtonWrite)
     {
-        //buttnoPressdInter
-        //When blueButton clicked call virtual function
-        //Call buttonPressedCallback
-        buttonPressedCallback();
+        //writePressed
+        //When radioButtonWrite selected call virtual function
+        //Call writeRadioCallback
+        writeRadioCallback();
+    }
+    else if (&src == &radioButtonRead)
+    {
+        //readPressed
+        //When radioButtonRead selected call virtual function
+        //Call readRadioCallback
+        readRadioCallback();
     }
 }

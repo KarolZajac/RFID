@@ -14,11 +14,16 @@ public:
 	}
 	virtual void setupScreen();
 	virtual void tearDownScreen();
-	void buttonPressedCallback() override;
+	void writeRadioCallback() override;
+	void readRadioCallback() override;
+
 protected:
 	//Image dynamicImage;
 	BitmapId dynamicBitmapId;
 	ScalableImage dynamicImage;
+
+	static constexpr unsigned textAreaBufferSize=256;
+	touchgfx::Unicode::UnicodeChar textAreaBuffer[textAreaBufferSize];
 };
 
 #endif // SCREENVIEW_HPP
