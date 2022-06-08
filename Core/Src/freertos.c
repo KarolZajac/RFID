@@ -25,6 +25,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "../RFID/Inc/rfid_task.h"
+
 #include "usb_host.h"
 #include "fatfs.h"
 /* USER CODE END Includes */
@@ -47,6 +49,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 osThreadId gfxTaskHandle;
+osThreadId rfidTaskHandle;
 extern ApplicationTypeDef Appli_state;
 
 /* USER CODE END Variables */
@@ -175,6 +178,9 @@ void MX_FREERTOS_Init(void)
 	/* add threads, ... */
 	osThreadDef(gfxTask, startGfxTask, osPriorityNormal, 0, 512);
 	gfxTaskHandle = osThreadCreate(osThread(gfxTask), NULL);
+
+	osThreadDef(rfidTask, startRfidTask, osPriorityNormal, 0, 256);
+	rfidTaskHandle = osThreadCreate(osThread(rfidTask), NULL);
 	/* USER CODE END RTOS_THREADS */
 
 }
