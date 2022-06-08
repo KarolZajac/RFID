@@ -126,7 +126,7 @@ uint8_t card_write(uint8_t blockId, uint8_t *data)
 	}
 	else{
 		for(uint8_t i=0; i<16; i++){
-			buffer[i]=*(data+1);
+			buffer[i]=*(data+i);
 		}
 
 		rc522_calculateCRC(buffer, 16, &buffer[16]);

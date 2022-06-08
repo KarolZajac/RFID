@@ -169,7 +169,7 @@ void cardTaskLoop()
 					card_stopCrypto();
 					snprintf(textBuffer, TEXT_BUFFER_SIZE, "Written to card");
 					toDisplayMessage displayData =
-					{ .imgData = buffer, .textDat = textBuffer };
+					{ .imgData = NULL, .textDat = textBuffer };
 					xQueueSend(toDisplayQueue, &displayData, 50);
 				}
 				else
