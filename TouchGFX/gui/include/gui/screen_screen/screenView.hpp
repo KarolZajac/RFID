@@ -17,6 +17,9 @@ public:
 	void writeRadioCallback() override;
 	void readRadioCallback() override;
 
+	void updateImage(uint8_t *img);
+	void updateText(const uint8_t *text);
+
 protected:
 	//Image dynamicImage;
 	BitmapId dynamicBitmapId;

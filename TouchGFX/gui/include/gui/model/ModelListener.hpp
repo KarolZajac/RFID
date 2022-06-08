@@ -2,20 +2,30 @@
 #define MODELLISTENER_HPP
 
 #include <gui/model/Model.hpp>
+#include "Message.h"
 
 class ModelListener
 {
 public:
-    ModelListener() : model(0) {}
-    
-    virtual ~ModelListener() {}
+	ModelListener() :
+			model(0)
+	{
+	}
 
-    void bind(Model* m)
-    {
-        model = m;
-    }
+	virtual ~ModelListener()
+	{
+	}
+
+	void bind(Model *m)
+	{
+		model = m;
+	}
+
+	virtual void notifyDataUpdated(toDisplayMessage msg)
+	{
+	}
 protected:
-    Model* model;
+	Model *model;
 };
 
 #endif // MODELLISTENER_HPP

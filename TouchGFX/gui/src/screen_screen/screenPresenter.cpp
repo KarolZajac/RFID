@@ -16,3 +16,12 @@ void screenPresenter::deactivate()
 {
 
 }
+
+void screenPresenter::notifyDataUpdated(toDisplayMessage msg)
+{
+	if(msg.imgData)
+		view.updateImage(msg.imgData);
+
+	if(msg.textDat)
+		view.updateText(msg.textDat);
+}

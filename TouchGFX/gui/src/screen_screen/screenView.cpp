@@ -5,8 +5,6 @@
 #include "fatfs.h"
 
 extern "C" uint8_t doWrite;
-extern "C" QueueHandle_t toDisplayQueue;
-
 
 const uint8_t imageStaticData[] =
 { 164, 73, 163, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -56,8 +54,7 @@ const uint8_t imageStaticData[] =
 		63, 204, 72, 63, 204, 72, 63 };
 
 constexpr uint8_t imgWidth = 15, imgHeight = 15;
-uint8_t *dynamicImageBuffer
-{ nullptr };
+
 
 screenView::screenView()
 {
@@ -66,7 +63,7 @@ screenView::screenView()
 	Bitmap dynamicBitmap = Bitmap(dynamicBitmapId);
 	uint8_t *dynBuffer = Bitmap::dynamicBitmapGetAddress(dynamicBitmapId);
 
-	std::memcpy(dynBuffer, imageStaticData, sizeof(imageStaticData)/2);
+	std::memcpy(dynBuffer, imageStaticData, sizeof(imageStaticData) / 2);
 	dynamicImage.setBitmap(dynamicBitmap);
 	dynamicImage.setXY(85, 165);
 	dynamicImage.setScalingAlgorithm(ScalableImage::NEAREST_NEIGHBOR);
@@ -74,7 +71,6 @@ screenView::screenView()
 	add(dynamicImage);
 }
 extern ApplicationTypeDef Appli_state;
-
 
 void screenView::setupScreen()
 {
@@ -101,3 +97,18 @@ void screenView::readRadioCallback()
 	textArea1.invalidate();
 	doWrite = 0;
 }
+
+void screenView::updateImage(uint8_t *img)
+{
+	uint8_t *dynBuffer = Bitmap::dynamicBitmapGetAddress(dynamicBitmapId);
+	std::memcpy(dynBuffer, img, 15 * 15 * 3);
+	dynamicImage.invalidate();
+}
+
+void screenView::updateText(const uint8_t *text)
+{
+	Unicode::snprintf(textAreaBuffer, textAreaBufferSize, reinterpret_cast<const char*>(text));
+	textArea1.setWildcard(textAreaBuffer);
+	textArea1.invalidate();
+}
+

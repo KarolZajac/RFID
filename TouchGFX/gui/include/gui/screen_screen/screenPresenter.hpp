@@ -27,6 +27,8 @@ public:
 
     virtual ~screenPresenter() {};
 
+	void notifyDataUpdated(toDisplayMessage msg) override;
+
 private:
     screenPresenter();
 
