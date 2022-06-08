@@ -4,13 +4,13 @@
     <Text Id="__SingleUse_HL70" TypographyId="Default" Alignment="Center" Direction="LTR">
       <Translation Language="GB">Write               Read</Translation>
     </Text>
-    <Text Id="__SingleUse_PPFX" TypographyId="Default" Alignment="Center" Direction="LTR">
+    <Text Id="__SingleUse_PPFX" TypographyId="Small" Alignment="Center" Direction="LTR">
       <Translation Language="GB">&lt;&gt;</Translation>
     </Text>
   </Texts>
   <Typographies>
-    <Typography Id="Default" Font="verdana.ttf" Size="20" Bpp="4" FallbackCharacter="?" WildcardCharacters="&lt;&gt;,./?&quot;':;![]{}|\" WildcardCharacterRanges="a-z,A-Z,0-9" />
+    <Typography Id="Default" Font="verdana.ttf" Size="20" Bpp="4" FallbackCharacter="?" />
     <Typography Id="Large" Font="verdana.ttf" Size="40" Bpp="4" FallbackCharacter="?" />
-    <Typography Id="Small" Font="verdana.ttf" Size="10" Bpp="4" FallbackCharacter="?" />
+    <Typography Id="Small" Font="verdana.ttf" Size="10" Bpp="4" FallbackCharacter="?" WildcardCharacters="()&lt;&gt;,./?&quot;':;![]{} |\" WildcardCharacterRanges="a-z,A-Z,0-9" />
   </Typographies>
 </TextDatabase>

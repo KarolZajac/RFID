@@ -55,13 +55,14 @@ unsigned embedTextIntoData(char *data, unsigned dataSize, const char *text,
 					| ((text[i] >> 2 * j) & 0x03);
 		}
 	}
+	xprintf("Embedded text lenghth:%d\n", toEmbed);
 	return toEmbed;
 }
 
 unsigned recoverTextFromData(const char *data, unsigned dataSize, uint8_t *text,
 		unsigned maxTextSize)
 {
-	unsigned index = 0;
+ 	unsigned index = 0;
 	const unsigned limit = min(maxTextSize, dataSize / 4);
 	while (index < limit)
 	{
@@ -75,5 +76,6 @@ unsigned recoverTextFromData(const char *data, unsigned dataSize, uint8_t *text,
 		if (workingOn == 0)
 			break;
 	}
+	xprintf("Recovered text length: %d\n", index);
 	return index;
 }

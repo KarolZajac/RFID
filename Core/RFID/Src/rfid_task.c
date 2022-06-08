@@ -124,8 +124,8 @@ void preparePayload()
 	readFromPendriveToBuffer();
 	unsigned len = loadTextIntoBuffer("tekst.txt", textBuffer,
 			TEXT_BUFFER_SIZE - 1);
-	textBuffer[TEXT_BUFFER_SIZE - 1] = 0;
-	embedTextIntoData(buffer, BUFFER_SIZE, textBuffer, len);
+	textBuffer[len] = 0;
+	embedTextIntoData(buffer, BUFFER_SIZE, textBuffer, len+1);
 }
 
 void cardTaskLoop()
@@ -165,7 +165,7 @@ void cardTaskLoop()
 					{
 						uint8_t status = card_authenticate(rfid_id, cardKeyA,
 								map_logical_to_physical_addres(i));
-						xprintf("\nAuth status: %d\n", status);
+						//xprintf("\nAuth status: %d\n", status);
 						if (status == 1)
 						{
 							status = card_write(
@@ -187,7 +187,7 @@ void cardTaskLoop()
 					{
 						uint8_t status = card_authenticate(rfid_id, cardKeyA,
 								map_logical_to_physical_addres(i));
-						xprintf("\nAuth status: %d\n", status);
+						//xprintf("\nAuth status: %d\n", status);
 						if (status == 1)
 						{
 							status = card_read(
