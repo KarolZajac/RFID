@@ -4,6 +4,10 @@
 #include "usb_host.h"
 #include "fatfs.h"
 
+extern "C" uint8_t doWrite;
+extern "C" QueueHandle_t toDisplayQueue;
+
+
 const uint8_t imageStaticData[] =
 { 164, 73, 163, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 		255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 36, 28, 237, 36,
@@ -87,6 +91,7 @@ void screenView::writeRadioCallback()
 	Unicode::snprintf(textAreaBuffer, textAreaBufferSize, "Writing!");
 	textArea1.setWildcard(textAreaBuffer);
 	textArea1.invalidate();
+	doWrite = 1;
 }
 
 void screenView::readRadioCallback()
@@ -94,4 +99,5 @@ void screenView::readRadioCallback()
 	Unicode::snprintf(textAreaBuffer, textAreaBufferSize, "Reading!");
 	textArea1.setWildcard(textAreaBuffer);
 	textArea1.invalidate();
+	doWrite = 0;
 }

@@ -9,6 +9,8 @@
 #include "../Inc/rc522_com.h"
 #include "../Inc/card_com.h"
 
+#include "main.h"
+
 
 uint8_t card_read(uint8_t blockId, uint8_t *buffer)
 {

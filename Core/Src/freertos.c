@@ -29,6 +29,8 @@
 
 #include "usb_host.h"
 #include "fatfs.h"
+
+#include "Message.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,6 +58,8 @@ extern ApplicationTypeDef Appli_state;
 osThreadId defaultTaskHandle;
 uint32_t defaultTaskBuffer[256];
 osStaticThreadDef_t defaultTaskControlBlock;
+
+QueueHandle_t toDisplayQueue;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -166,6 +170,12 @@ void MX_FREERTOS_Init(void)
 
 	/* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
+	toDisplayQueue = xQueueCreate(2, sizeof(toDisplayMessage));
+	if(!toDisplayQueue)
+	{
+		xprintf("Failed to create queue!\n");
+		return;
+	}
 	/* USER CODE END RTOS_QUEUES */
 
 	/* Create the thread(s) */

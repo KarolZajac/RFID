@@ -78,7 +78,7 @@ void dummyLoop()
 	}
 }
 
-void startRfidTask(void *_)
+void startRfidTask(const void *_)
 {
 	UNUSED(_);
 	while (1)
