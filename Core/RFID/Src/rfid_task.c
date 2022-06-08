@@ -12,10 +12,14 @@
 #include "../RFID/Inc/rc522_com.h"
 #include "../RFID/Inc/card_com.h"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 752
+#define TEXT_BUFFER_SIZE 189
+#define USER_DATA_BLOCK_NUM 47
+
+static uint8_t buffer[BUFFER_SIZE];
+static uint8_t textBuffer[TEXT_BUFFER_SIZE];
 
 uint8_t doWrite = 1;
-static uint8_t buffer[BUFFER_SIZE];
 
 void dummyLoop() {
 	uint8_t rfid_id[16];
@@ -55,7 +59,7 @@ void dummyLoop() {
 								dummyBuffer[i + 4], dummyBuffer[i + 5], dummyBuffer[i + 6],
 								dummyBuffer[i + 7]);
 
-					xprintf("Writting data to card\n");
+					xprintf("Writing data to card\n");
 					if (dummyBuffer[0] == 255) {
 						status = card_write(4, data2);
 					} else {
@@ -78,8 +82,11 @@ void cardTaskLoop() {
 	for (uint8_t i = 0; i < 6; ++i) {
 		cardKeyA[i] = 0x0FF;
 	}
-	for (uint8_t i = 0; i < 1024; ++i) {
+	for (uint8_t i = 0; i < BUFFER_SIZE; ++i) {
 		buffer[i] = i / 16;
+	}
+	for (uint8_t i = 0; i < TEXT_BUFFER_SIZE; ++i) {
+		textBuffer[i] = 0x00;
 	}
 	while (1) {
 		if (rc522_checkCard(rfid_id)) {
@@ -91,14 +98,14 @@ void cardTaskLoop() {
 				xprintf("\nAuth status: %d\n", status);
 
 				if (status == 1) {
-					if (doWrite == 0) {
-						xprintf("Writting data to card\n");
-						for (uint8_t i = 0; i < 47; i++) {
+					if (doWrite == 1) {
+						xprintf("Writing data to card\n");
+						for (uint8_t i = 0; i < USER_DATA_BLOCK_NUM; i++) {
 							status = card_write(map_logical_to_physical_addres(i),&buffer[16 * i]);
 							xprintf("\nWrite status to block %d: %d\n", i,status);
 						}
 					} else {
-						for (uint8_t i = 0; i < 47; i++) {
+						for (uint8_t i = 0; i < USER_DATA_BLOCK_NUM; i++) {
 							status = card_read(map_logical_to_physical_addres(i),&buffer[16 * i]);
 							xprintf("\nBlock %d read status: %d\n", i, status);
 						}
