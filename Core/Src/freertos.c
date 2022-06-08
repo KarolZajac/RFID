@@ -189,7 +189,7 @@ void MX_FREERTOS_Init(void)
 	osThreadDef(gfxTask, startGfxTask, osPriorityNormal, 0, 512);
 	gfxTaskHandle = osThreadCreate(osThread(gfxTask), NULL);
 
-	osThreadDef(rfidTask, startRfidTask, osPriorityNormal, 0, 256);
+	osThreadDef(rfidTask, startRfidTask, osPriorityNormal, 0, 512);
 	rfidTaskHandle = osThreadCreate(osThread(rfidTask), NULL);
 	/* USER CODE END RTOS_THREADS */
 

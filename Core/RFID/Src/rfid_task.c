@@ -149,7 +149,7 @@ void cardTaskLoop()
 
 				if (doWrite == 1)
 				{
-					//readFromPendriveToBuffer();
+					readFromPendriveToBuffer();
 					xprintf("Writing data to card\n");
 					for (uint8_t i = 0; i < USER_DATA_BLOCK_NUM; i++)
 					{
@@ -169,7 +169,7 @@ void cardTaskLoop()
 					card_stopCrypto();
 					snprintf(textBuffer, TEXT_BUFFER_SIZE, "Written to card");
 					toDisplayMessage displayData =
-					{ .imgData = NULL, .textDat = textBuffer };
+					{ .imgData = buffer, .textDat = textBuffer };
 					xQueueSend(toDisplayQueue, &displayData, 50);
 				}
 				else
@@ -206,7 +206,7 @@ void cardTaskLoop()
 				}
 			}
 		}
-		vTaskDelay(2500);
+		vTaskDelay(250);
 	}
 }
 
