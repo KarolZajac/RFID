@@ -18,16 +18,29 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
+#include "crc.h"
+#include "dma.h"
+#include "dma2d.h"
 #include "eth.h"
+#include "fatfs.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
-#include "usb_otg.h"
+#include "usb_host.h"
 #include "gpio.h"
-#include "../RFID/Inc/rc522_com.h"
-#include "../RFID/Inc/card_com.h"
+#include "app_touchgfx.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "../RFID/Inc/rc522_com.h"
+#include "../RFID/Inc/card_com.h"
+#include "display.h"
+#include "touch.h"
+#include "calibration.h"
 
+#include "usbh_platform.h"
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,6 +65,10 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
@@ -88,39 +105,44 @@ int main(void)
 	MX_GPIO_Init();
 	MX_ETH_Init();
 	MX_USART3_UART_Init();
-	MX_USB_OTG_FS_PCD_Init();
+	MX_DMA_Init();
 	MX_SPI3_Init();
+	MX_SPI4_Init();
+	MX_TIM13_Init();
+	MX_FATFS_Init();
+	MX_SPI1_Init();
+	MX_DMA2D_Init();
+	MX_CRC_Init();
+	MX_TouchGFX_Init();
 	/* USER CODE BEGIN 2 */
 	debug_init(&huart3);
-	xprintf("Program started, verification number %d\n", 3);
-	HAL_Delay(2000);
+	xprintf("Debug initialized!\n");
+	MX_DriverVbusFS(0);
 	rc522_init();
+	display_init();
+	HAL_TIM_PWM_Start(&htim13, TIM_CHANNEL_1);
+	display_paint_red();
+	calibrate_display();
+	xprintf("Calibration done!\n");
 	/* USER CODE END 2 */
 
+	/* Call init function for freertos objects (in freertos.c) */
+	MX_FREERTOS_Init();
+
+	/* Start scheduler */
+	osKernelStart();
+
+	/* We should never get here as control is now taken by the scheduler */
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	uint8_t rfid_id[16];
-	uint8_t cardKeyA[6];
 
-	uint16_t bufferSize = 16;
-	uint8_t buffer[bufferSize];
-	uint8_t data1[16];
-	uint8_t data2[16];
-
-	for (uint8_t i = 0; i < 6; ++i){
-		cardKeyA[i] = 0x0FF;
-	}
 
 //	overwrite to check if works
 //	for (uint8_t i = 0; i < 16; ++i){
 //		buffer[i]=255;
 //	}
 
-	for (uint8_t i = 0; i < 16; ++i){
-		data1[i]=255;
-		data2[i]=7;
-	}
 
 	while (1)
 	{
@@ -130,39 +152,7 @@ int main(void)
 //		rc522_writeReg(versionRegisterAddr, 0xDE);
 //		xprintf("Read from reg 0x%x value 0x%x after writing\r\n ",
 //				versionRegisterAddr, rc522_readReg(versionRegisterAddr));
-		if (rc522_checkCard(rfid_id))
-		{
 
-			xprintf("\nRFID code is: \r\n 0x%02x 0x%02x 0x%02x 0x%02x\n",rfid_id[0], rfid_id[1], rfid_id[2], rfid_id[3]);
-
-			if(card_select(rfid_id) > 0){
-				uint8_t status = card_authenticate(rfid_id, cardKeyA, 4);
-				xprintf("\nAuth status: %d\n", status);
-
-				if(status == 1){
-					status = card_read(4, buffer);
-
-					xprintf("\nRead status: %d\n", status);
-					xprintf("Read %d bytes\n", bufferSize);
-					xprintf("Read data:\n");
-					for (uint8_t i = 0; i < 16; i+=8)
-						xprintf("%d %d %d %d %d %d %d %d\n", buffer[i], buffer[i + 1],
-							buffer[i + 2], buffer[i + 3], buffer[i + 4],
-							buffer[i + 5], buffer[i + 6], buffer[i + 7]);
-
-					xprintf("Writting data to card\n");
-					if(buffer[0] == 255){
-						status = card_write(4, data2);
-					}
-					else{
-						status = card_write(4, data1);
-					}
-					xprintf("\nWrite status: %d\n", status);
-					card_stopCrypto();
-					//now in next iteration you can read new data
-				}
-			}
-		}
 		HAL_Delay(1000);
 		/* USER CODE END WHILE */
 
@@ -221,6 +211,28 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/**
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM6 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	/* USER CODE BEGIN Callback 0 */
+
+	/* USER CODE END Callback 0 */
+	if (htim->Instance == TIM6)
+	{
+		HAL_IncTick();
+	}
+	/* USER CODE BEGIN Callback 1 */
+
+	/* USER CODE END Callback 1 */
+}
 
 /**
  * @brief  This function is executed in case of error occurrence.

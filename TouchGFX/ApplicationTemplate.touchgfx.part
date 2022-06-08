@@ -1,0 +1,22 @@
+
+{
+  "Application": {
+    "Name": "RFID",
+    "TouchGfxPath": "../Middlewares/ST/touchgfx",
+    "AvailableColorDepths": [ 24 ],
+    "AvailableLCDs":
+    {
+      "24": "LCD24bpp"
+    },
+    "AvailableResolutions" : [
+      {
+        "Width": 320,
+        "Height": 480
+      }
+    ],
+    "PostGenerateTargetCommand" : "touchgfx update_project --project-file=../RFID.ioc --platform=m4",
+    "Family" : "STM32F4",
+    "SubFamily" : "STM32F429/439"
+  },
+  "Version": "4.18.0"
+}

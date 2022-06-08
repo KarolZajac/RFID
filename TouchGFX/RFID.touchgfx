@@ -1,0 +1,148 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "screen",
+        "Components": [
+          {
+            "Type": "TiledImage",
+            "Name": "tiledImage1",
+            "Width": 320,
+            "Height": 480,
+            "FileName": "__designer\\Blue_Textures_carbon_fibre.png"
+          },
+          {
+            "Type": "RadioButton",
+            "Name": "radioButtonWrite",
+            "X": 57,
+            "Y": 63,
+            "Width": 44,
+            "Height": 44,
+            "Selected": true,
+            "FileNameSelected": "__designer\\Blue_Radio_buttons_Radio_Round_button_active.png",
+            "FileNameSelectedPressed": "__designer\\Blue_Radio_buttons_Radio_Round_button_normal.png",
+            "FileNameUnselected": "__designer\\Blue_Radio_buttons_Radio_Round_button_inactive.png",
+            "FileNameUnselectedPressed": "__designer\\Blue_Radio_buttons_Radio_Round_button_pressed.png",
+            "RadioButtonGroup": "radioButtonGroup1",
+            "Style": "Style3"
+          },
+          {
+            "Type": "RadioButton",
+            "Name": "radioButtonRead",
+            "X": 218,
+            "Y": 63,
+            "Width": 44,
+            "Height": 44,
+            "FileNameSelected": "__designer\\Blue_Radio_buttons_Radio_Round_button_active.png",
+            "FileNameSelectedPressed": "__designer\\Blue_Radio_buttons_Radio_Round_button_normal.png",
+            "FileNameUnselected": "__designer\\Blue_Radio_buttons_Radio_Round_button_inactive.png",
+            "FileNameUnselectedPressed": "__designer\\Blue_Radio_buttons_Radio_Round_button_pressed.png",
+            "RadioButtonGroup": "radioButtonGroup1",
+            "Style": "Style3"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 48,
+            "Y": 369,
+            "Width": 225,
+            "Height": 82,
+            "TextId": "__SingleUse_PPFX",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {}
+          },
+          {
+            "Type": "TextArea",
+            "Name": "buttonLabelText",
+            "Y": 27,
+            "Width": 320,
+            "Height": 24,
+            "TextId": "__SingleUse_HL70",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            }
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "writePressed",
+            "Trigger": {
+              "Type": "TriggerRadioButtonSelected",
+              "TriggerComponent": "radioButtonWrite"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "writeRadioCallback"
+            }
+          },
+          {
+            "InteractionName": "readPressed",
+            "Trigger": {
+              "Type": "TriggerRadioButtonSelected",
+              "TriggerComponent": "radioButtonRead"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "readRadioCallback"
+            }
+          }
+        ]
+      }
+    ],
+    "CustomContainerDefinitions": [],
+    "Name": "MyApplication",
+    "Resolution": {
+      "Width": 320,
+      "Height": 480
+    },
+    "SelectedColorDepth": 24,
+    "StartupScreenName": "screen",
+    "SelectedStartupLanguage": "GB",
+    "Skin": "Blue",
+    "TouchGfxPath": "../Middlewares/ST/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      24
+    ],
+    "AvailableLCDs": {
+      "24": "LCD24bpp"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 320,
+        "Height": 480
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD24bpp": {
+        "Id": "LCD24bpp",
+        "IsEnabled": true
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project --project-file=../RFID.ioc --platform=m4",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Portrait",
+    "Family": "STM32F4"
+  },
+  "Version": "4.18.0"
+}

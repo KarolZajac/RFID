@@ -9,6 +9,8 @@
 #include "../Inc/rc522_com.h"
 #include "../Inc/card_com.h"
 
+#include "main.h"
+
 
 uint8_t card_read(uint8_t blockId, uint8_t *buffer)
 {
@@ -124,7 +126,7 @@ uint8_t card_write(uint8_t blockId, uint8_t *data)
 	}
 	else{
 		for(uint8_t i=0; i<16; i++){
-			buffer[i]=*(data+1);
+			buffer[i]=*(data+i);
 		}
 
 		rc522_calculateCRC(buffer, 16, &buffer[16]);
@@ -137,6 +139,16 @@ uint8_t card_write(uint8_t blockId, uint8_t *data)
 	}
 
 	return status;
+}
+
+uint16_t map_logical_to_physical_addres(uint16_t logicalAddress)
+{
+	if(logicalAddress > 46){
+		printf("Logical address exceeds max block number.");
+		return 0xFFFF;
+	}
+
+	return logicalAddress+1+(logicalAddress+1)/3;
 }
 
 
