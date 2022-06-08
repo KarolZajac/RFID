@@ -146,7 +146,7 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 	}
 
 	//Waiting to receive data to complete
-	i = 2000; //max waiting time 20ms for now - writing data now works
+	i = 2000;//timeout
 	do {
 		n = rc522_readReg(0x04);//read interrupt request bits
 		i--;
@@ -156,7 +156,9 @@ uint8_t rc522_toCard(uint8_t command, uint8_t *sendData, uint8_t sendLen,
 	//xprintf("toCard timeout counter: %d\n",i);
 	if (i != 0) {//if not timeouted
 //		xprintf("ErrorReg: %d\n", rc522_readReg(0x06));
-		if (!(rc522_readReg(0x06) & 0x1B)) { //if no error in error register on buffer overflow, collision error, parity error or protocol error
+		uint8_t errorReg = rc522_readReg(0x06);
+		//xprintf("Error reg: %x\n", errorReg);
+		if (!(errorReg & 0x1B)) { //if no error in error register on buffer overflow, collision error, parity error or protocol error
 			status = 1;
 			if (n & irqEn & 0x01) {//if command==transcieve and timeout interrupt active
 				status = 0;//fail
