@@ -1,4 +1,6 @@
 #include <gui/screen_screen/screenView.hpp>
+#include <cstring>
+#include "main.h"
 
 const uint8_t imageStaticData[] =
 { 164, 73, 163, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -47,26 +49,24 @@ const uint8_t imageStaticData[] =
 		255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 204, 72, 63, 204, 72,
 		63, 204, 72, 63, 204, 72, 63 };
 
-const uint8_t imgWidth = 15, imgHeight = 15;
-const uint16_t bitmapCacheSize = 2048;
-uint16_t bitmapCache[bitmapCacheSize];
+constexpr uint8_t imgWidth = 15, imgHeight = 15;
+uint8_t *dynamicImageBuffer{nullptr};
 
 screenView::screenView()
 {
-	Bitmap::setCache(bitmapCache, bitmapCacheSize, 2);
 	BitmapId dynamicBitmapId = Bitmap::dynamicBitmapCreate(imgWidth, imgHeight,
 			Bitmap::RGB888);
 	Bitmap dynamicBitmap = Bitmap(dynamicBitmapId);
 	uint8_t *dynBuffer = Bitmap::dynamicBitmapGetAddress(dynamicBitmapId);
-	for (int i = 0; i < imgWidth * imgHeight * 3; ++i)
-	{
-		dynBuffer[i] = imageStaticData[i];
-	}
-	dynamicImage.setBitmap(dynamicBitmap);
-	dynamicImage.setXY(147, 225);
-	add(dynamicImage);
 
+	std::memcpy(dynBuffer, imageStaticData, sizeof(imageStaticData));
+	dynamicImage.setBitmap(dynamicBitmap);
+	dynamicImage.setXY(85, 165);
+	dynamicImage.setScalingAlgorithm(ScalableImage::NEAREST_NEIGHBOR);
+	dynamicImage.setWidthHeight(150, 150);
+	add(dynamicImage);
 }
+
 
 void screenView::setupScreen()
 {
