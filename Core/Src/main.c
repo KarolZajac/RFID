@@ -37,6 +37,10 @@
 #include "../RFID/Inc/card_com.h"
 #include "display.h"
 #include "touch.h"
+#include "calibration.h"
+
+#include "usbh_platform.h"
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -112,8 +116,8 @@ int main(void)
 	MX_TouchGFX_Init();
 	/* USER CODE BEGIN 2 */
 	debug_init(&huart3);
-	xprintf("Program started, verification number %d\n", 3);
-	HAL_Delay(2000);
+	xprintf("Debug initialized!\n");
+	MX_DriverVbusFS(0);
 	rc522_init();
 	display_init();
 	HAL_TIM_PWM_Start(&htim13, TIM_CHANNEL_1);

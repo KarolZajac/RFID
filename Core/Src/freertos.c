@@ -25,7 +25,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "usb_host.h"
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,8 +47,12 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 osThreadId gfxTaskHandle;
+extern ApplicationTypeDef Appli_state;
+
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
+uint32_t defaultTaskBuffer[256];
+osStaticThreadDef_t defaultTaskControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -55,6 +60,56 @@ void startGfxTask(const void *_)
 {
 	UNUSED(_);
 	MX_TouchGFX_Process();
+}
+
+void waitForUsbMsd(void)
+{
+	xprintf("\nwaiting for USB device...\n");
+	do
+	{
+		vTaskDelay(100);
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	} while (Appli_state != APPLICATION_READY);
+	xprintf("USB device ready!\n");
+	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+}
+
+void listdir()
+{
+	xprintf("Listing files:\n");
+	FRESULT res;
+	DIR d;
+	FILINFO f;
+	res = f_findfirst(&d, &f, "0:/", "*");
+	xprintf("Opened first!\n");
+	while (res == FR_OK && f.fname[0])
+	{
+		xprintf("Found file: %s\n", f.fname);
+		res = f_findnext(&d, &f);
+	}
+	f_closedir(&d);
+}
+
+void dumpFile()
+{
+	/* USER CODE END 2 */
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	FIL f;
+	if (f_open(&f, "0:/test.txt", FA_READ) != FR_OK)
+		xprintf("Failed to open file!\n");
+	int sumDumped = 0;
+
+	char buffer[17];
+	buffer[16] = 0;
+	int numread = 0;
+	while (f_read(&f, buffer, 16, &numread) == FR_OK && numread != 0)
+	{
+		sumDumped += numread;
+		xprintf("Read chunk: %s\n", buffer);
+	}
+	xprintf("Read %d bytes from file.\n", sumDumped);
+	f_close(&f);
 }
 
 void touchgfxSignalVSync(void);
@@ -112,7 +167,8 @@ void MX_FREERTOS_Init(void)
 
 	/* Create the thread(s) */
 	/* definition and creation of defaultTask */
-	osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+	osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256,
+			defaultTaskBuffer, &defaultTaskControlBlock);
 	defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
 	/* USER CODE BEGIN RTOS_THREADS */
@@ -135,11 +191,27 @@ void StartDefaultTask(void const *argument)
 	/* init code for USB_HOST */
 	MX_USB_HOST_Init();
 	/* USER CODE BEGIN StartDefaultTask */
+	MX_DriverVbusFS(1);
+
+	waitForUsbMsd();
 	/* Infinite loop */
+	xprintf("\nwaiting for USB device...\n");
 	for (;;)
 	{
 		osDelay(100);
 		touchgfxSignalVSync();
+		if (Appli_state == APPLICATION_READY)
+		{
+			//xprintf("USB connected!\n");
+			static uint8_t done = 0;
+			if (!done)
+			{
+				done = 1;
+				listdir();
+				xprintf("Listed files!\n");
+			}
+
+		}
 	}
 	/* USER CODE END StartDefaultTask */
 }

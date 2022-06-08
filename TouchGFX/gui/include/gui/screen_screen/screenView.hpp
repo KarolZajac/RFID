@@ -14,8 +14,10 @@ public:
 	}
 	virtual void setupScreen();
 	virtual void tearDownScreen();
+	void buttonPressedCallback() override;
 protected:
 	//Image dynamicImage;
+	BitmapId dynamicBitmapId;
 	ScalableImage dynamicImage;
 };
 

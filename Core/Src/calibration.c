@@ -40,6 +40,7 @@ void calibrate_display()
 static int16_t map(int16_t val, int16_t fromMin, int16_t fromMax, int16_t toMin,
 		int16_t toMax)
 {
+	if(fromMax == fromMin) return 0;
 	return (val - fromMin) * (toMax - toMin) / (fromMax - fromMin) + toMin;
 }
 
