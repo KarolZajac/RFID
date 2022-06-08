@@ -14,7 +14,7 @@
 #include "../RFID/Inc/rc522_com.h"
 #include "../RFID/Inc/card_com.h"
 #include "Message.h"
-
+#include "stegan.h"
 #include "fatfs.h"
 
 #define BUFFER_SIZE 752
@@ -112,11 +112,20 @@ void readFromPendriveToBuffer()
 				&& sumDumped <= BUFFER_SIZE)
 		{
 			memcpy(&buffer[sumDumped], tmpBuffer, numread);
-			sumDumped += numread; //xprintf("Read chunk: %s\n", buffer);
+			sumDumped += numread;
 		}
 		xprintf("Read %d bytes from file.\n", sumDumped);
 		f_close(&f);
 	}
+}
+
+void preparePayload()
+{
+	readFromPendriveToBuffer();
+	unsigned len = loadTextIntoBuffer("tekst.txt", textBuffer,
+			TEXT_BUFFER_SIZE - 1);
+	textBuffer[TEXT_BUFFER_SIZE - 1] = 0;
+	embedTextIntoData(buffer, BUFFER_SIZE, textBuffer, len);
 }
 
 void cardTaskLoop()
@@ -138,7 +147,7 @@ void cardTaskLoop()
 	}
 	while (1)
 	{
-		xprintf("RFID looping!\n");
+		//xprintf("RFID looping!\n");
 		if (rc522_checkCard(rfid_id))
 		{
 			xprintf("\nRFID code is: \r\n 0x%02x 0x%02x 0x%02x 0x%02x\n",
@@ -149,7 +158,8 @@ void cardTaskLoop()
 
 				if (doWrite == 1)
 				{
-					readFromPendriveToBuffer();
+					preparePayload();
+
 					xprintf("Writing data to card\n");
 					for (uint8_t i = 0; i < USER_DATA_BLOCK_NUM; i++)
 					{
@@ -164,7 +174,6 @@ void cardTaskLoop()
 							xprintf("\nWrite status to block %d: %d\n", i,
 									status);
 						}
-//						card_stopCrypto();
 					}
 					card_stopCrypto();
 					snprintf(textBuffer, TEXT_BUFFER_SIZE, "Written to card");
@@ -186,7 +195,6 @@ void cardTaskLoop()
 									&buffer[16 * i]);
 							xprintf("\nBlock %d read status: %d\n", i, status);
 						}
-//						card_stopCrypto();
 					}
 					card_stopCrypto();
 //						xprintf("Read %d bytes\n", BUFFER_SIZE);
@@ -199,7 +207,9 @@ void cardTaskLoop()
 //								buffer[i + 4], buffer[i + 5], buffer[i + 6],
 //								buffer[i + 7]);
 //					}
-					snprintf(textBuffer, TEXT_BUFFER_SIZE, "Reading from card");
+					//snprintf(textBuffer, TEXT_BUFFER_SIZE, "Reading from card");
+					recoverTextFromData(buffer, BUFFER_SIZE, textBuffer,
+							TEXT_BUFFER_SIZE);
 					toDisplayMessage displayData =
 					{ .imgData = buffer, .textDat = textBuffer };
 					xQueueSend(toDisplayQueue, &displayData, 50);
