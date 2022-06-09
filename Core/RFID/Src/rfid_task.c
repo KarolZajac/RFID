@@ -16,6 +16,7 @@
 #include "Message.h"
 #include "stegan.h"
 #include "fatfs.h"
+#include "bmpLoader.h"
 
 #define BUFFER_SIZE 752
 #define TEXT_BUFFER_SIZE 189
@@ -121,7 +122,8 @@ void readFromPendriveToBuffer()
 
 void preparePayload()
 {
-	readFromPendriveToBuffer();
+	//readFromPendriveToBuffer();
+	loadPixelBufferFromBmpFile(buffer, BUFFER_SIZE, "img.bmp");
 	unsigned len = loadTextIntoBuffer("tekst.txt", textBuffer,
 			TEXT_BUFFER_SIZE - 1);
 	textBuffer[len] = 0;

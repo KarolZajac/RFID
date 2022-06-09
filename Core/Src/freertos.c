@@ -60,7 +60,6 @@ uint32_t defaultTaskBuffer[256];
 osStaticThreadDef_t defaultTaskControlBlock;
 
 QueueHandle_t toDisplayQueue;
-
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void startGfxTask(const void *_)
@@ -109,7 +108,7 @@ void dumpFile()
 
 	char buffer[17];
 	buffer[16] = 0;
-	int numread = 0;
+	unsigned numread = 0;
 	while (f_read(&f, buffer, 16, &numread) == FR_OK && numread != 0)
 	{
 		sumDumped += numread;
@@ -171,7 +170,7 @@ void MX_FREERTOS_Init(void)
 	/* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
 	toDisplayQueue = xQueueCreate(2, sizeof(toDisplayMessage));
-	if(!toDisplayQueue)
+	if (!toDisplayQueue)
 	{
 		xprintf("Failed to create queue!\n");
 		return;
@@ -189,7 +188,7 @@ void MX_FREERTOS_Init(void)
 	osThreadDef(gfxTask, startGfxTask, osPriorityNormal, 0, 512);
 	gfxTaskHandle = osThreadCreate(osThread(gfxTask), NULL);
 
-	osThreadDef(rfidTask, startRfidTask, osPriorityNormal, 0, 512);
+	osThreadDef(rfidTask, startRfidTask, osPriorityNormal, 0, 1024);
 	rfidTaskHandle = osThreadCreate(osThread(rfidTask), NULL);
 	/* USER CODE END RTOS_THREADS */
 
@@ -216,18 +215,18 @@ void StartDefaultTask(void const *argument)
 	{
 		osDelay(100);
 		touchgfxSignalVSync();
-		if (Appli_state == APPLICATION_READY)
-		{
-			//xprintf("USB connected!\n");
-			static uint8_t done = 0;
-			if (!done)
-			{
-				done = 1;
-				listdir();
-				xprintf("Listed files!\n");
-			}
+		//if (Appli_state == APPLICATION_READY)
+		//{
+		//	//xprintf("USB connected!\n");
+//			static uint8_t done = 0;
+//			if (!done)
+//			{
+//				done = 1;
+//				listdir();
+//				xprintf("Listed files!\n");
+//			}
 
-		}
+		//}
 	}
 	/* USER CODE END StartDefaultTask */
 }
